@@ -59,8 +59,10 @@ class GrokTest
         Dir.glob(File.join(path, '*')) do |child_path|
            self.each_path(child_path, &block)
         end
-      else
+      elsif File.exists? path
         yield path
+      else
+        raise Error, "No such file: #{path}"
       end
     end
   end
