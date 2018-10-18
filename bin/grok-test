@@ -112,11 +112,13 @@ class GrokTest
   # @param file [File]
   def test(file)
     for line in file
-      puts "#{@grok.pattern}\t#{line}"
+      puts "#{line}"
 
       match(line) do |field, value|
         puts "\t#{field}: #{value}"
       end
+
+      puts
     end
   end
 end
