@@ -6,9 +6,13 @@ require 'logger'
 
 require 'grok-pure'
 
+GROK_TEST_PATH = File.expand_path '..', File.dirname(__FILE__)
+
 options = OpenStruct.new(
   log_level: Logger::WARN,
-  pattern_paths: [],
+  pattern_paths: [
+    File.join(GROK_TEST_PATH, 'patterns'),
+  ],
   named_captures_only: true,
   pattern: nil,
 )
