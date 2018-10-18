@@ -1,0 +1,132 @@
+#!/usr/bin/env ruby
+
+require 'ostruct'
+require 'optparse'
+require 'logger'
+
+require 'grok-pure'
+
+options = OpenStruct.new(
+  log_level: Logger::WARN,
+  pattern_paths: [],
+  named_captures_only: true,
+  pattern: nil,
+)
+
+parser = OptionParser.new do |p|
+  p.on("--debug") do
+    options.log_level = Logger::DEBUG
+  end
+  p.on("--verbose") do
+    options.log_level = Logger::INFO
+  end
+
+  p.on("-P", "--patterns=PATH", "Load patterns") do |path|
+    options.pattern_paths << path
+  end
+  p.on("--all-captures", "Use all captures, not only named") do
+    options.named_captures_only = false
+  end
+  p.on('-p', '--pattern=PATTERN', "Match pattern") do |pattern|
+    options.pattern = pattern
+  end
+end
+
+parser.parse!
+
+if ARGV.empty?
+  inputs = [$stdin]
+else
+  inputs = ARGV.map {|path| File.open(path) }
+end
+
+$logger = Logger.new($stderr)
+$logger.level = options.log_level
+
+class Error < StandardError
+
+end
+
+class GrokTest
+  # @param path [String]
+  def self.each_path(*paths, &block)
+    for path in paths
+      if File.directory? path
+        Dir.glob(File.join(path, '*')) do |child_path|
+           self.each_path(child_path, &block)
+        end
+      else
+        yield path
+      end
+    end
+  end
+
+  def self.build(options)
+    grok = Grok.new
+
+    self.each_path(*options.pattern_paths) do |path|
+      $logger.info { "Load patterns from path: #{path}" }
+
+      grok.add_patterns_from_file(path)
+    end
+
+    $logger.debug { "Compile pattern: #{pattern}" }
+
+    grok.compile(options.pattern,
+      named_captures_only: options.named_captures_only,
+    )
+
+    new(grok)
+  end
+
+  def initialize(grok)
+    @grok = grok
+  end
+
+  # @param pattern [String]
+  # @param message [String]
+  # @yield [key, value]
+  # @raise [Error] no match
+  def match(message)
+    $logger.debug { "Match message: #{message}" }
+
+    match = @grok.match_and_capture(message) do |field, value|
+      next if value.nil?
+
+      yield field, value
+    end
+
+    $logger.debug { "Message matched" }
+
+    raise Error, "Message did not match #{@grok.pattern}: #{message}" unless match
+  end
+
+  # @param file [File]
+  def test(file)
+    for line in file
+      puts "#{@grok.pattern}\t#{line}"
+
+      match(line) do |field, value|
+        puts "\t#{field}: #{value}"
+      end
+    end
+  end
+end
+
+grok_test = GrokTest.build(options)
+errors = 0
+
+for file in inputs
+  begin
+    grok_test.test(file)
+  rescue Error => exc
+    $logger.error("Test #{file.path} failed: #{exc}")
+    errors += 1
+  end
+end
+
+if errors > 0
+  exit 1
+else
+  exit 0
+end
