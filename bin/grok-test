@@ -81,6 +81,8 @@ class GrokTest
     )
 
     new(grok)
+  rescue Grok::PatternError => exc
+    raise Error, "Invalid pattern #{options.pattern}: #{exc}"
   end
 
   def initialize(grok)
