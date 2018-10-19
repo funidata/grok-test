@@ -18,6 +18,8 @@ options = OpenStruct.new(
 )
 
 parser = OptionParser.new do |p|
+  p.banner = "Usage: grok-test [options] --pattern=PATTERN [INPUT-FILES]..."
+
   p.on("--debug") do
     options.log_level = Logger::DEBUG
   end
@@ -37,6 +39,10 @@ parser = OptionParser.new do |p|
 end
 
 parser.parse!
+
+if !options.pattern
+  abort "Usage: --pattern is required"
+end
 
 if ARGV.empty?
   inputs = [$stdin]
