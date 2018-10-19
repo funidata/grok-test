@@ -41,9 +41,9 @@ if !options.pattern
 end
 
 if ARGV.empty?
-  inputs = [$stdin]
+  inputs = [GrokTest::Input.stdin]
 else
-  inputs = ARGV.map {|path| File.open(path) }
+  inputs = ARGV.map {|path| GrokTest::Input.open(path) }
 end
 
 $logger = Logger.new($stderr)
@@ -54,11 +54,11 @@ GrokTest.logger = $logger
 grok_test = GrokTest.build(options)
 errors = 0
 
-for file in inputs
+for input in inputs
   begin
-    grok_test.test(file)
+    grok_test.test(input)
   rescue GrokTest::Error => exc
-    $logger.error("Test #{file.path} failed: #{exc}")
+    $logger.error("Test #{input} failed: #{exc}")
     errors += 1
   end
 end

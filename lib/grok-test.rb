@@ -9,6 +9,29 @@ class GrokTest
 
   end
 
+  class Input
+    def self.stdin
+      new($stdin, path: '<stdin')
+    end
+
+    def self.open(path)
+      new(File.open(path), path: path)
+    end
+
+    def initialize(file, path: )
+      @file = file
+      @path = path
+    end
+
+    def to_s
+      @path
+    end
+
+    def each(&block)
+      @file.each(&block)
+    end
+  end
+
   def self.logger=(logger)
     @logger = logger
   end
@@ -77,9 +100,9 @@ class GrokTest
     raise Error, "Message did not match #{@grok.pattern}: #{message}" unless match
   end
 
-  # @param file [File]
-  def test(file)
-    for line in file
+  # @param input [Input]
+  def test(input)
+    for line in input
       puts "#{line}"
 
       match(line) do |field, value|
