@@ -3,7 +3,7 @@ Test [logstash grok](https://www.elastic.co/guide/en/logstash/current/plugins-fi
 # Examples
 
 ## Configuring Grok patterns
-NOTE: this does *NOT* test logstash filter configurations, only grok patterns. You should move your `grok { match => ... }` regexes to grok pattern files, using a minimal `logstash.conf` filter:
+NOTE: this does *NOT* test logstash filter configurations, only grok patterns. You should move your `grok { match => ... }` regexes to grok pattern files, leaving a minimal `logstash.conf` filter:
 
 ```
 filter {
@@ -16,7 +16,7 @@ filter {
 }
 ```
 
-The same pattern arguments can then be passed to `grok-test`:
+The same `patterns_dir` and `match` pattern arguments can then be passed to `grok-test`:
 
 ```
 $ grok-test --patterns roles/logstash/files/patterns/ --pattern '%{PAM_LOG}|%{SSHD_LOG}'
@@ -24,7 +24,7 @@ $ grok-test --patterns roles/logstash/files/patterns/ --pattern '%{PAM_LOG}|%{S
 
 ## Generating input logs for testing
 
-If you are matching against the logstash `message` field, then you must feed the plain log messages as input, not entirely syslog logfiles.
+If you are matching against the logstash `message` field, then you must feed the plain log messages as input, not entire syslog logfiles.
 
 This is easy to do using `systemd-journald`:
 
@@ -38,7 +38,7 @@ $ journalctl -t sudo -o cat
 The generated output consists of:
 
 * The original input line
-* Grok captures, one per line, indentend
+* Grok captures, one per line, indented
 * An empty line
 
 ```
@@ -54,10 +54,17 @@ $ journalctl -t sudo -o cat PRIORITY=5 -n 1 | grok-test --patterns roles/logstas
 
 ## Comparing output changes when grok patterns change
 
-Use the included `grok-test.sh` script to diff `*.log` -> `*.out` changes:
+Setup a directory with `*.log` files, and use the included `grok-test.sh` script to diff `*.log` -> `*.out` changes:
 
 ```
 $ ~/grok-test/setup.sh
+$ mkdir roles/logstash/grok-test
+$ journalctl -t sudo -o cat > roles/logstash/grok-test/sudo.log
+```
+
+The first argument to `grok-test.sh` is the path prefix to the `*.log` file, and the script will generate/update a corresponding `*.out` file:
+
+```
 $ mkdir tests
 $ GROK_TEST=.bin/grok-test .bin/grok-test.sh roles/logstash/grok-test/sudo --patterns roles/logstash/files/patterns --pattern '%{PAM_LOG}|%{SUDO_LOG}'
 [DIFF] roles/logstash/grok-test/sudo
@@ -72,7 +79,7 @@ $ GROK_TEST=.bin/grok-test .bin/grok-test.sh roles/logstash/grok-test/sudo --pa
 
 ```
 
-The first argument to `grok-test.sh` is the path prefix to a pair of `*.log` and `*.out` files (`journalctl -t sudo -o cat > roles/logstash/grok-test/sudo.log`). The `*.log` and `*.out` files should be commited to version control as test-case input/expected-output files.
+The `*.log` and `*.out` files should be commited to version control as test-case input/expected-output files
 
 # Setup
 
