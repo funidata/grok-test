@@ -52,11 +52,36 @@ $ journalctl -t sudo -o cat PRIORITY=5 -n 1 | grok-test --patterns roles/logstas
 
 ```
 
-# Setup
+## Comparing output changes when grok patterns change
+
+Use the included `grok-test.sh` script to diff `*.log` -> `*.out` changes:
 
 ```
-$ gem build grok-test.gemspec && gem install --user grok-test-*.gem
-$ ln -sr ~/.gem/ruby/*/bin/grok-test ~/.local/bin
+$ ~/grok-test/setup.sh
+$ mkdir tests
+$ GROK_TEST=.bin/grok-test .bin/grok-test.sh roles/logstash/grok-test/sudo --patterns roles/logstash/files/patterns --pattern '%{PAM_LOG}|%{SUDO_LOG}'
+[DIFF] roles/logstash/grok-test/sudo
+    --- roles/logstash/grok-test/sudo.out	2018-10-19 14:03:26.096453730 +0300
+    +++ roles/logstash/grok-test/sudo.new	2018-10-19 14:03:27.412457705 +0300
+    @@ -83,5 +83,5 @@
+     	sudo.group: docker
+     	sudo.env: TEST=foo
+     	sudo.command: /bin/echo test
+    -	sudo.error:
+    +	sudo.error: command not allowed
+
+```
+
+The first argument to `grok-test.sh` is the path prefix to a pair of `*.log` and `*.out` files (`journalctl -t sudo -o cat > roles/logstash/grok-test/sudo.log`). The `*.log` and `*.out` files should be commited to version control as test-case input/expected-output files.
+
+# Setup
+
+Use the included `setup.sh` script to build and install the gem into your user gempath (`~/.gem`), installing the binstubs into `.bin` in your current working directory:
+
+```
+$ .../setup.sh
+$ .bin/grok-test --help
+$ GROK_TEST=.bin/grok-test .bin/grok-test.sh ...
 ```
 
 # Usage
