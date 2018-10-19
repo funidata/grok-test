@@ -79,7 +79,9 @@ $ GROK_TEST=.bin/grok-test .bin/grok-test.sh roles/logstash/grok-test/sudo --pa
 
 ```
 
-The `*.log` and `*.out` files should be commited to version control as test-case input/expected-output files
+The `*.log` and `*.out` files should be commited to version control as test-case input/expected-output files.
+
+The script also writes temporary `.new` and `.diff` files, which should also get cleaned up.
 
 # Requirements
 
