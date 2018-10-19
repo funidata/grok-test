@@ -81,6 +81,10 @@ $ GROK_TEST=.bin/grok-test .bin/grok-test.sh roles/logstash/grok-test/sudo --pa
 
 The `*.log` and `*.out` files should be commited to version control as test-case input/expected-output files
 
+# Requirements
+
+* ruby
+
 # Setup
 
 Use the included `setup.sh` script to build and install the gem into your user gempath (`~/.gem`), installing the binstubs into `.bin` in your current working directory:
