@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
   s.email       = 'tero.marttila@funidata.fi'
   s.files       = FileList[
     'bin/grok-test',
+    'lib/*.rb',
     'patterns/*',
   ]
   s.executables = [
