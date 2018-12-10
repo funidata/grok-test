@@ -17,5 +17,5 @@ test -d $BIN || mkdir $BIN
 
   test -e grok-test-$VERSION.gem || gem build grok-test.gemspec
   test -e $BIN/.grok-test_$VERSION || gem install --user --bindir=$BIN grok-test-$VERSION.gem && touch $BIN/.grok-test_$VERSION
-  test grok-test.sh -nt $BIN/grok-test.sh && install -m 0755 -t $BIN bin/grok-test.sh
+  test \! grok-test.sh -nt $BIN/grok-test.sh || install -m 0755 -t $BIN bin/grok-test.sh
 )
