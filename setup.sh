@@ -2,7 +2,7 @@
 
 set -ue
 
-BIN=${BIN:-PWD/.bin}
+BIN=${BIN:-$PWD/.bin}
 SRC=$(dirname $0)
 VERSION=0.2.0
 
